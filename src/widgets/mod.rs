@@ -6,10 +6,15 @@ use ratatui::{
 use crate::app_state::State;
 
 pub fn add_widgets_to_frame(frame: &mut Frame, app: &State) {
-    let outer_layout = Layout::default()
+    let title_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints(vec![Constraint::Percentage(8), Constraint::Percentage(92)])
+        .split(frame.area());
+
+    let outer_text_layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(vec![Constraint::Percentage(30), Constraint::Percentage(70)])
-        .split(frame.area());
+        .split(title_layout[1]);
 
     let mut sidebar_widgets: Vec<widgets::Paragraph> = Vec::new();
     for i in 0..app.num_widgets {
@@ -25,11 +30,23 @@ pub fn add_widgets_to_frame(frame: &mut Frame, app: &State) {
     let inner_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(area_widgets)
-        .split(outer_layout[0]);
+        .split(outer_text_layout[0]);
 
     frame.render_widget(
         Paragraph::new("Vertical Sidebar").block(Block::new().borders(Borders::ALL)),
-        outer_layout[1],
+        outer_text_layout[1],
+    );
+
+    frame.render_widget(
+        Paragraph::new("GITLENS-TUI")
+            .block(
+                Block::new()
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Double),
+            )
+            .bg(Color::Blue)
+            .alignment(Alignment::Center),
+        title_layout[0],
     );
 
     for (widget, area) in sidebar_widgets.iter().zip(inner_layout.iter()) {
