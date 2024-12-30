@@ -1,17 +1,12 @@
-use std::{io, time::Duration};
-
 mod app_state;
+mod key_handler;
 mod widgets;
 
 use app_state::State;
-use ratatui::{
-    crossterm::event::{self, poll, KeyCode, KeyEventKind},
-    // style::Stylize,
-    // widgets::Paragraph,
-    DefaultTerminal,
-};
+use key_handler::read_key;
+use ratatui::DefaultTerminal;
 
-fn main() -> io::Result<()> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut terminal = ratatui::init();
     match terminal.clear() {
         Err(error) => panic!("Error: {error:?}"),
@@ -22,24 +17,16 @@ fn main() -> io::Result<()> {
     return app_result;
 }
 
-fn run(mut terminal: DefaultTerminal) -> io::Result<()> {
+fn run(mut terminal: DefaultTerminal) -> Result<(), Box<dyn std::error::Error>> {
     let mut app: State = app_state::State::new(2);
-    loop {
+    while app.running {
         match terminal.draw(|frame| {
             widgets::add_widgets_to_frame(frame, &app);
         }) {
             Err(error) => panic!("Error: {error:?}"),
             Ok(_) => (),
         };
-
-        if poll(Duration::from_millis(1000))? {
-            if let event::Event::Key(key) = event::read()? {
-                if key.kind == KeyEventKind::Press && key.code == KeyCode::Char('q') {
-                    return Ok(());
-                } else {
-                    app.num_widgets += 1;
-                }
-            }
-        }
+        read_key(&mut app)?;
     }
+    return Ok(());
 }
