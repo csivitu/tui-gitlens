@@ -1,5 +1,7 @@
 mod app_state;
 mod key_handler;
+mod render;
+mod sections;
 mod widgets;
 
 use app_state::State;
@@ -18,10 +20,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn run(mut terminal: DefaultTerminal) -> Result<(), Box<dyn std::error::Error>> {
-    let mut app: State = app_state::State::new(2);
+    let mut app: State = app_state::State::new(5, "tui-gitlens".to_string());
     while app.running {
         match terminal.draw(|frame| {
-            widgets::add_widgets_to_frame(frame, &app);
+            render::add_widgets_to_frame(frame, &app);
         }) {
             Err(error) => panic!("Error: {error:?}"),
             Ok(_) => (),
